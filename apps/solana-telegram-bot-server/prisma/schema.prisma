@@ -1,0 +1,97 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model TradeOrder {
+  amount      Float?
+  createdAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  jitoFee     Float?
+  price       Float?
+  priorityFee Float?
+  slippage    Float?
+  status      String?
+  token       Token?   @relation(fields: [tokenId], references: [id])
+  tokenId     String?
+  typeField   String?
+  updatedAt   DateTime @updatedAt
+  wallet      Wallet?  @relation(fields: [walletId], references: [id])
+  walletId    String?
+}
+
+model Wallet {
+  createdAt   DateTime     @default(now())
+  csvExports  CsvExport[]
+  id          String       @id @default(cuid())
+  privateKey  String?
+  publicKey   String?
+  tradeOrders TradeOrder[]
+  updatedAt   DateTime     @updatedAt
+  user        User?        @relation(fields: [userId], references: [id])
+  userId      String?
+}
+
+model Token {
+  createdAt   DateTime     @default(now())
+  decimals    Int?
+  id          String       @id @default(cuid())
+  name        String?
+  symbolField String?
+  tradeOrders TradeOrder[]
+  updatedAt   DateTime     @updatedAt
+}
+
+model Report {
+  createdAt DateTime  @default(now())
+  endDate   DateTime?
+  id        String    @id @default(cuid())
+  startDate DateTime?
+  updatedAt DateTime  @updatedAt
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model CsvExport {
+  createdAt   DateTime  @default(now())
+  generatedAt DateTime?
+  id          String    @id @default(cuid())
+  updatedAt   DateTime  @updatedAt
+  user        User?     @relation(fields: [userId], references: [id])
+  userId      String?
+  wallet      Wallet?   @relation(fields: [walletId], references: [id])
+  walletId    String?
+}
+
+model User {
+  createdAt          DateTime        @default(now())
+  csvExports         CsvExport[]
+  email              String?         @unique
+  firstName          String?
+  id                 String          @id @default(cuid())
+  lastName           String?
+  password           String
+  reports            Report[]
+  roles              Json
+  telegramId         String?
+  tradeSettingsItems TradeSettings[]
+  updatedAt          DateTime        @updatedAt
+  username           String          @unique
+  walletBalance      Float?
+  wallets            Wallet[]
+}
+
+model TradeSettings {
+  createdAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  jitoTip     Float?
+  priorityFee Float?
+  slippage    Float?
+  updatedAt   DateTime @updatedAt
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+}
